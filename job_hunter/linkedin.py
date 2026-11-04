@@ -134,7 +134,7 @@ class LinkedInClient:
             {
                 "User-Agent": user_agent,
                 "Accept": "text/html,application/xhtml+xml",
-                "Accept-Language": "tr,en;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9,fr;q=0.8",
             }
         )
         self._last_request = 0.0
