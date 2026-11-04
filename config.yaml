@@ -1,193 +1,117 @@
-# ---------------------------------------------------------------------------
-# LinkedIn Job Hunter ayarları
-#
-# Değiştireceğin tek dosya burası. Şifre/token buraya YAZILMAZ; onlar
-# GitHub Actions secrets içinde durur (README'ye bak).
-# ---------------------------------------------------------------------------
 
 searches:
-  - name: "Finans / FP&A"
-    # En fazla 10 anahtar kelime.
+
+  # ==========================================
+  # SEARCH 1: FRANCE
+  # ==========================================
+
+  - name: "Graphic Designer - France"
+
     keywords:
-      - finans       # Türkçe başlıklar: "Finans Uzmanı", "Finansal Raporlama"
-      - finance      # İngilizce başlıklar: "Finance Manager"
-      - reporting
-      - raporlama
-      - IFRS
-      - UFRS
-      - LOGO
-      - controlling
-      - power bi       # "Power BI Developer", "Data Analyst (Power BI & SQL)"
-      - treasury
-    # Konum: LinkedIn'in tanıdığı herhangi bir yazım. Boş bırakırsan her yer.
-    location: "İstanbul, Türkiye"
-    # any = kelimelerden herhangi biri geçsin (önerilen)
-    # all = kelimelerin hepsi birden geçsin
+      - "Graphic Designer"
+      - "Graphic Design"
+      - "Designer graphique"
+      - "Graphiste"
+      - "Visual Designer"
+      - "Brand Designer"
+      - "Digital Designer"
+
+    location: "France"
+
     match_mode: any
-    # Bu kelimeler ilan başlığında geçiyorsa ilanı hiç gönderme.
+
     exclude:
-      - stajyer
-      - intern
-    # Sadece uzaktan çalışma ilanları için true yap.
+      - "stage"
+      - "stages"
+      - "intern"
+      - "internship"
+      - "alternance"
+      - "apprentissage"
+      - "CDD"
+      - "intérim"
+
     remote_only: false
-    # Bu aramanın sonuçları ayrıca şu adreslere de gitsin (arkadaşların için).
+
     recipients: []
-    # Kelime başına taranacak en fazla ilan (en yeniden eskiye). 10 dakikada
-    # bir tarandığı için 25 fazlasıyla yeterli; büyütmek LinkedIn'e giden
-    # istek sayısını artırır.
-    # LinkedIn, sonuç az olduğunda listeyi yurt dışından ilanlarla dolduruyor.
-    # Konumunda bu kelimelerden biri geçen ilanlar elenir.
-    exclude_locations:
-      - Romanya
-      - Romania
-      - Çin
-      - China
-      - Hindistan
-      - India
-      - Polonya
-      - Poland
-      - Almanya
-      - Germany
-      - Birleşik Krallık
-      - United Kingdom
-      - Amerika
-      - United States
+
     max_results: 25
 
-  - name: "Pazarlama / CRM"
-    keywords:
-      - pazarlama      # "Dijital Pazarlama Uzmanı"
-      - marketing      # Growth/Brand/Performance/Multi-Channel Marketing'i de kapsar
-      - CRM
-      - loyalty
-      - sadakat        # "Sadakat Programları Uzmanı"
-      - kampanya       # "Kampanya Yönetimi Uzmanı"
-      - campaign       # "Campaign Manager"
-      - ad operations  # "Ad Operations Specialist"
-      - marka          # "Marka Yöneticisi"
-      - iletişim       # "Kurumsal İletişim Uzmanı"
-    location: "İstanbul, Türkiye"
-    match_mode: any
-    exclude:
-      - stajyer
-      - intern
-    # Adresler repoda durmasın diye secret'tan okunuyor.
-    # GitHub'da MARKETING_EMAILS adıyla, iki adres virgülle ayrılmış olarak tanımlı.
-    recipients_secret: MARKETING_EMAILS
-    # LinkedIn, sonuç az olduğunda listeyi yurt dışından ilanlarla dolduruyor.
-    # Konumunda bu kelimelerden biri geçen ilanlar elenir.
-    exclude_locations:
-      - Romanya
-      - Romania
-      - Çin
-      - China
-      - Hindistan
-      - India
-      - Polonya
-      - Poland
-      - Almanya
-      - Germany
-      - Birleşik Krallık
-      - United Kingdom
-      - Amerika
-      - United States
-    max_results: 25
-    # İş bulunca aramayı silme, burayı false yap.
     enabled: true
 
-  - name: "Samet – Sistem Yöneticisi"
+
+  # ==========================================
+  # SEARCH 2: JAKARTA, INDONESIA
+  # ==========================================
+
+  - name: "Graphic Designer - Jakarta"
+
     keywords:
-      - sistem           # Sistem Mühendisi/Yöneticisi/Sorumlusu, Bilgi Sistemleri
-      - system           # System Administrator, Systems Engineer
-      - BT               # BT Yöneticisi, BT Sorumlusu
-      - IT               # IT Yöneticisi, Kıdemli IT Uzmanı, IT Manager
-      - server           # Windows Server, Server Uzmanı
-      - linux
-      - active directory
-      - vmware
-      - sanallaştırma
-      - firewall
-    location: "İstanbul, Türkiye"
+      - "Graphic Designer"
+      - "Graphic Design"
+      - "Desainer Grafis"
+      - "Desain Grafis"
+      - "Visual Designer"
+      - "Brand Designer"
+      - "Digital Designer"
+
+    location: "Jakarta, Indonesia"
+
     match_mode: any
+
     exclude:
-      - stajyer
-      - intern
-      # "sistem" kelimesi IT dışı alanlarda da geçtiği için gürültü filtresi
-      - control systems
-      - kontrol sistemleri
-      - enerji
-      - energy
-      - batarya
-      - battery
-      - quality
-      - kalite
-      - backend
-      - technician
-    exclude_locations:
-      - Romanya
-      - Romania
-      - Çin
-      - China
-      - Hindistan
-      - India
-      - Polonya
-      - Poland
-      - Almanya
-      - Germany
-      - Birleşik Krallık
-      - United Kingdom
-      - Amerika
-      - United States
-    recipients_secret: SAMET_EMAIL
+      - "intern"
+      - "internship"
+      - "magang"
+      - "trainee"
+
+    remote_only: false
+
+    recipients: []
+
     max_results: 25
+
     enabled: true
 
-  # Bir arkadaşın için ikinci arama örneği — kullanmıyorsan bu bloğu sil.
-  #
-  # Adresini buraya YAZMA: repo herkese açık. Bunun yerine adresi bir secret
-  # olarak ekle (Settings > Secrets > Actions), adını da recipients_secret'a yaz.
-  # Bu aramanın sonuçları yalnızca o adrese gider, sana gelmez.
-  #
-  # İş bulup durdurmak istersen bloğu silmene gerek yok: enabled: false yeter.
-  #
-  # - name: "Ayşe – denetim"
-  #   keywords: ["internal audit", "denetim", "iç kontrol"]
-  #   location: "Ankara, Türkiye"
-  #   match_mode: any
-  #   exclude: ["stajyer"]
-  #   recipients_secret: AYSE_EMAIL
-  #   max_results: 25
-  #   enabled: true
+
+# ==========================================
+# NOTIFICATIONS
+# ==========================================
 
 notifications:
+
   email:
     enabled: true
-    # Bildirimlerin gideceği adres(ler).
-    # Repo herkese açıksa adresini buraya YAZMA; bunun yerine EMAIL_RECIPIENTS
-    # secret'ını kullan (virgülle ayırarak birden fazla adres yazabilirsin).
+
     recipients: []
-    subject_prefix: "[İlan]"
-    # Gmail dışında bir sağlayıcı kullanıyorsan host/port'u SMTP_HOST ve
-    # SMTP_PORT secret'ları ile de verebilirsin.
+
+    subject_prefix: "[Graphic Designer Job Alert]"
+
     host: "smtp.gmail.com"
+
     port: 587
+
     use_ssl: false
 
-  # ntfy.sh ile telefona anlık push. Varsayılan olarak KAPALI.
-  # Dikkat: ntfy.sh'te konu adı şifre gibidir; konu adını bilen herkes
-  # mesajları okuyabilir. Açacaksan tahmin edilemeyecek bir isim seç.
   ntfy:
     enabled: false
+
     server: "https://ntfy.sh"
-    topic: ""          # ya da NTFY_TOPIC secret'ı ile ver
+
+    topic: ""
+
     priority: default
 
+
+# ==========================================
+# GENERAL SETTINGS
+# ==========================================
+
 settings:
-  # Kaç saat geriye bakılsın (LinkedIn'in "Son 24 saat" filtresi).
+
   hours: 24
-  # LinkedIn'i yormamak için istekler arası bekleme (saniye).
+
   request_delay_seconds: 3
-  # Daha önce bildirilen ilanların tutulduğu dosya.
+
   state_file: "state/seen_jobs.json"
-  # Bu kadar gün sonra kayıttan düşer (dosya şişmesin diye).
+
   forget_after_days: 30
