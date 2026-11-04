@@ -32,7 +32,7 @@ def subject(jobs: list[Job], prefix: str = "[İlan]") -> str:
         title = job.title or "Yeni ilan"
         company = f" – {job.company}" if job.company else ""
         return one_line(f"{prefix} {title}{company}")
-    return f"{prefix} {count} yeni ilan"
+    return f"{prefix} {count} new jobi jobi bibi princess :3"
 
 
 def as_text(jobs: list[Job]) -> str:
