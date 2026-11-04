@@ -83,7 +83,7 @@ def as_html(jobs: list[Job]) -> str:
             f"""
       <h2 style="font-size:15px;color:#111827;margin:26px 0 4px;">
         {html.escape(search_name)}
-        <span style="color:#6b7280;font-weight:400;">({len(group)} yeni ilan)</span>
+        <span style="color:#6b7280;font-weight:400;">({len(group)} jobz)</span>
       </h2>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{rows}</table>"""
         )
@@ -93,11 +93,10 @@ def as_html(jobs: list[Job]) -> str:
 <html lang="tr"><body style="margin:0;background:#f9fafb;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;">
   <div style="max-width:640px;margin:0 auto;padding:24px;background:#ffffff;">
     <p style="font-size:13px;color:#6b7280;margin:0 0 4px;">LinkedIn Job Hunter</p>
-    <h1 style="font-size:20px;color:#111827;margin:0;">{len(jobs)} yeni ilan bulundu</h1>
+    <h1 style="font-size:20px;color:#111827;margin:0;">{len(jobs)} new jobz bibi princess :3</h1>
     {body}
     <p style="color:#9ca3af;font-size:12px;margin-top:28px;border-top:1px solid #e5e7eb;padding-top:12px;">
-      Bu e-posta senin kurduğun ilan takipçisi tarafından otomatik gönderildi.
-      Anahtar kelimeleri veya konumu değiştirmek için config.yaml dosyasını düzenle.
+      Wabui bibi hawo kitty princess with a ribbon. Wish you the best of luck in this job hunt :3
     </p>
   </div>
 </body></html>"""
