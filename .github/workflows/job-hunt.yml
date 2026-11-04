@@ -1,9 +1,9 @@
+
 name: LinkedIn ilan taraması
 
-# Tarama, cron-job.org'dan gelen workflow_dispatch istekleriyle 15 dakikada bir
-# tetikleniyor (kurulumu README'de). GitHub'ın kendi 'schedule' tetikleyicisi
-# bilerek kullanılmıyor: saatlerce hiç çalışmadı, sonra devreye girip ikinci bir
-# tetikleyici hâline geldi ve turlar üst üste binmeye başladı.
+# Runs manually or through cron-job.org using workflow_dispatch.
+# GitHub's own schedule trigger is intentionally disabled.
+
 on:
   workflow_dispatch:
     inputs:
@@ -11,51 +11,71 @@ on:
         description: "Bildirim gönderme, sadece bulunanları logla"
         type: boolean
         default: false
-      # Aşağıdakiler tek seferlik toparlama taraması içindir; normal turlarda
-      # boş bırakılır ve config'teki değerler geçerli olur.
+
       only_search:
-        description: "Yalnızca adı bunu içeren aramayı çalıştır (ör. Samet)"
-        type: string
-        default: ""
-      hours:
-        description: "Kaç saat geriye bakılsın (boş = config'teki değer)"
-        type: string
-        default: ""
-      max_results:
-        description: "Kelime başına en fazla ilan (boş = config'teki değer)"
+        description: "Yalnızca adı bunu içeren aramayı çalıştır (boş = tümü)"
         type: string
         default: ""
 
+      hours:
+        description: "Kaç saat geriye bakılsın (boş = config değeri)"
+        type: string
+        default: ""
+
+      max_results:
+        description: "Kelime başına en fazla ilan (boş = config değeri)"
+        type: string
+        default: ""
+
+# Prevent overlapping searches on the same branch.
 concurrency:
-  # Kilit adı: 13 Eylül 2026'daki GitHub kesintisinde bir çalışma "queued"
-  # durumunda takılı kaldı, iptal komutlarını da reddetti ve eski kilit adını
-  # süresiz tuttu; arkasından gelen her tarama sıraya girip iptal edildi. Adı
-  # değiştirmek yeni taramaları o hayalet işten kurtarır. Böyle bir durum
-  # tekrarlarsa yapılacak şey yine budur: sondaki sayıyı artır.
-  group: job-hunt-2
+  group: job-hunt-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
-  contents: write   # görülen ilanların kaydını repoya geri yazmak için
+  contents: write
 
 jobs:
   hunt:
     runs-on: ubuntu-latest
-    # Asılı kalan bir tarama kilidi süresiz tutmasın: normalde ~3,5 dakika
-    # sürüyor, 15 dakikada kesilmesi güvenli bir üst sınır.
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+    # Maximum execution time.
+    timeout-minutes: 25
+
+    steps:
+
+      # --------------------------------------
+      # 1. Download repository
+      # --------------------------------------
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # --------------------------------------
+      # 2. Install Python
+      # --------------------------------------
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: pip
+          cache-dependency-path: requirements.txt
 
-      - name: Bağımlılıkları kur
-        run: pip install -r requirements.txt
+      # --------------------------------------
+      # 3. Install dependencies
+      # --------------------------------------
 
-      - name: İlanları tara ve bildir
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+
+      # --------------------------------------
+      # 4. Run LinkedIn Job Hunter
+      # --------------------------------------
+
+      - name: Hunt for jobs
         env:
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
@@ -63,63 +83,110 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           SMTP_FROM: ${{ secrets.SMTP_FROM }}
           EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
-          # config.yaml'da bir aramaya 'recipients_secret' eklediğinde o
-          # secret'ı buraya da yazmalısın; GitHub secret'ları kendiliğinden
-          # uygulamaya geçirmiyor.
-          MARKETING_EMAILS: ${{ secrets.MARKETING_EMAILS }}
-          SAMET_EMAIL: ${{ secrets.SAMET_EMAIL }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
-        run: |
-          python -m job_hunter \
-            --config config.yaml \
-            ${{ inputs.dry_run && '--dry-run' || '' }} \
-            ${{ inputs.only_search && format('--only-search "{0}"', inputs.only_search) || '' }} \
-            ${{ inputs.hours && format('--hours {0}', inputs.hours) || '' }} \
-            ${{ inputs.max_results && format('--max-results {0}', inputs.max_results) || '' }}
 
-      - name: Görülen ilanların kaydını sakla
-        if: always()
+          DRY_RUN: ${{ inputs.dry_run }}
+          ONLY_SEARCH: ${{ inputs.only_search }}
+          HOURS: ${{ inputs.hours }}
+          MAX_RESULTS: ${{ inputs.max_results }}
+
+        shell: bash
         run: |
-          if [[ -z "$(git status --porcelain state/)" ]]; then
-            echo "Kayıt dosyasında değişiklik yok."
+          set -euo pipefail
+
+          args=(--config config.yaml)
+
+          if [[ "$DRY_RUN" == "true" ]]; then
+            args+=(--dry-run)
+          fi
+
+          if [[ -n "$ONLY_SEARCH" ]]; then
+            args+=(--only-search "$ONLY_SEARCH")
+          fi
+
+          if [[ -n "$HOURS" ]]; then
+            args+=(--hours "$HOURS")
+          fi
+
+          if [[ -n "$MAX_RESULTS" ]]; then
+            args+=(--max-results "$MAX_RESULTS")
+          fi
+
+          python -m job_hunter "${args[@]}"
+
+      # --------------------------------------
+      # 5. Save seen jobs
+      # --------------------------------------
+
+      - name: Save seen jobs
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          STATE_FILE="state/seen_jobs.json"
+
+          if [[ ! -f "$STATE_FILE" ]]; then
+            echo "No state file found. Nothing to save."
             exit 0
           fi
 
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [[ -z "$(git status --porcelain -- "$STATE_FILE")" ]]; then
+            echo "No changes to the job history."
+            exit 0
+          fi
 
-          # Bu turun kaydını sakla: aşağıda depoyu uzak sürüme sıfırlayacağız.
-          cp state/seen_jobs.json "${RUNNER_TEMP}/mine.json"
+          git config user.name "github-actions[bot]"
+          git config user.email \
+            "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Keep this run's state safe while updating the repository.
+          cp "$STATE_FILE" "${RUNNER_TEMP}/mine.json"
 
           for attempt in 1 2 3 4; do
-            # fetch/reset ağ üzerinden çalışır ve GitHub kaynaklı anlık
-            # kesintilerde 128 ile düşer. Adımı öldürmesin: bir sonraki
-            # denemeye geçelim, kayıt dosyası elimizde duruyor.
-            if ! git fetch -q origin "${GITHUB_REF_NAME}" \
-               || ! git reset -q --hard "origin/${GITHUB_REF_NAME}"; then
-              echo "Depo güncellenemedi (deneme ${attempt}), tekrar denenecek." >&2
+
+            echo "Saving job history: attempt ${attempt}"
+
+            # Fetch the latest repository state.
+            if ! git fetch -q origin "$GITHUB_REF_NAME"; then
+              echo "Fetch failed. Retrying..."
               sleep $((attempt * 5))
               continue
             fi
 
-            # Başka bir tur bu arada kendi kaydını yazmış olabilir. JSON'u
-            # rebase etmek çakışır; iki turun gördüğü ilanların birleşimi ise
-            # her zaman doğru cevaptır.
+            # Synchronize with the latest remote version.
+            if ! git reset -q --hard "origin/$GITHUB_REF_NAME"; then
+              echo "Reset failed. Retrying..."
+              sleep $((attempt * 5))
+              continue
+            fi
+
+            # Merge this run's discoveries with existing history.
             python scripts/merge_state.py \
-              "${RUNNER_TEMP}/mine.json" state/seen_jobs.json state/seen_jobs.json
+              "${RUNNER_TEMP}/mine.json" \
+              "$STATE_FILE" \
+              "$STATE_FILE"
 
-            if [[ -z "$(git status --porcelain state/)" ]]; then
-              echo "Kayıt zaten güncel."
+            if [[ -z "$(git status --porcelain -- "$STATE_FILE")" ]]; then
+              echo "Job history is already up to date."
               exit 0
             fi
 
-            git add state/
-            git commit -q -m "chore: görülen ilanların kaydını güncelle [skip ci]"
+            git add "$STATE_FILE"
+
+            git commit -m \
+              "chore: update seen jobs [skip ci]"
+
+            # Push updated job history.
             if git push -q origin "HEAD:${GITHUB_REF_NAME}"; then
+              echo "Job history saved successfully."
               exit 0
             fi
+
+            echo "Push failed. Retrying..."
             sleep $((attempt * 2))
+
           done
 
-          echo "Kayıt dosyası push edilemedi." >&2
+          echo "Unable to save job history after 4 attempts." >&2
           exit 1
