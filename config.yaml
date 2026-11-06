@@ -119,7 +119,7 @@ notifications:
 
     recipients: []
 
-    subject_prefix: "[Graphic Designer Job Alert]"
+    subject_prefix: "[New job bibi :3]"
 
     host: "smtp.gmail.com"
 
