@@ -73,6 +73,41 @@ searches:
     enabled: true
 
 
+
+  # ==========================================
+  # SEARCH 3 : TANGERANG, INDONESIA
+  # ==========================================
+
+  - name: "Graphic Designer - Tangerang"
+
+    keywords:
+      - "Graphic Designer"
+      - "Graphic Design"
+      - "Desainer Grafis"
+      - "Desain Grafis"
+      - "Visual Designer"
+      - "Brand Designer"
+      - "Digital Designer"
+
+    location: "Tangerang, Indonesia"
+
+    match_mode: any
+
+    exclude:
+      - "intern"
+      - "internship"
+      - "magang"
+      - "trainee"
+
+    remote_only: false
+
+    recipients: []
+
+    max_results: 25
+
+    enabled: true
+
+
 # ==========================================
 # NOTIFICATIONS
 # ==========================================
